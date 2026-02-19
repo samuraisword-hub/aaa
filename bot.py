@@ -27,14 +27,10 @@ class ThreadNameModal(discord.ui.Modal, title='ブロードキャスト'):
 
         for channel in guild.text_channels:
             try:
-                # アクティブスレッドを取得
                 all_threads = list(channel.threads)
-
-                # デバッグ：見つかったスレッド名を記録
                 thread_names = [t.name for t in all_threads]
                 print(f"チャンネル {channel.name}: スレッド {thread_names}")
                 
-                # アーカイブ済みスレッドも取得
                 try:
                     async for archived_thread in channel.archived_threads(limit=100):
                         all_threads.append(archived_thread)
@@ -45,15 +41,15 @@ class ThreadNameModal(discord.ui.Modal, title='ブロードキャスト'):
                 for thread in all_threads:
                     if thread.name == self.thread_name.value:
                         print(f"マッチ: {channel.name} > {thread.name}")
-                        # 画像ファイルを取得
+                        
                         files = []
                         if self.message.attachments:
                             for attachment in self.message.attachments:
                                 file = await attachment.to_file()
                                 files.append(file)
                         
-                        # テキストと画像を一緒に送信
-                           print(f"送信内容: content={bool(self.message.content)}, files={len(files)}")
+                        print(f"送信内容: content={bool(self.message.content)}, files={len(files)}")
+                        
                         if files:
                             await thread.send(content=self.message.content or "", files=files)
                         elif self.message.content:
@@ -66,6 +62,7 @@ class ThreadNameModal(discord.ui.Modal, title='ブロードキャスト'):
                 if not found:
                     skipped.append(f"#{channel.name}")
             except Exception as e:
+                print(f"エラー: {channel.name} - {e}")
                 skipped.append(f"#{channel.name} (エラー: {e})")
 
         result = f"✅ 送信完了: {len(success)}件\n"
