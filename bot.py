@@ -29,6 +29,10 @@ class ThreadNameModal(discord.ui.Modal, title='ブロードキャスト'):
             try:
                 # アクティブスレッドを取得
                 all_threads = list(channel.threads)
+
+                # デバッグ：見つかったスレッド名を記録
+                thread_names = [t.name for t in all_threads]
+                print(f"チャンネル {channel.name}: スレッド {thread_names}")
                 
                 # アーカイブ済みスレッドも取得
                 try:
