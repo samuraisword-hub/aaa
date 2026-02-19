@@ -30,15 +30,18 @@ class ThreadNameModal(discord.ui.Modal, title='ブロードキャスト'):
                 threads = channel.threads
                 for thread in threads:
                     if thread.name == self.thread_name.value:
-                        # テキスト送信
-                        if self.message.content:
-                            await thread.send(self.message.content)
-                        
-                        # 添付ファイル（画像含む）送信
+                      # 画像ファイルを取得
+                        files = []
                         if self.message.attachments:
                             for attachment in self.message.attachments:
                                 file = await attachment.to_file()
-                                await thread.send(file=file)
+                                files.append(file)
+                        
+                        # テキストと画像を一緒に送信
+                        if files:
+                            await thread.send(content=self.message.content or "", files=files)
+                        elif self.message.content:
+                            await thread.send(self.message.content)
                         
                         success.append(f"#{channel.name} > {thread.name}")
                         break
