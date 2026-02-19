@@ -37,7 +37,8 @@ class ThreadNameModal(discord.ui.Modal, title='ブロードキャスト'):
                         # 添付ファイル（画像含む）送信
                         if self.message.attachments:
                             for attachment in self.message.attachments:
-                                await thread.send(attachment.url)
+                                file = await attachment.to_file()
+                                await thread.send(file=file)
                         
                         success.append(f"#{channel.name} > {thread.name}")
                         break
