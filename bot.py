@@ -25,12 +25,17 @@ class ThreadNameModal(discord.ui.Modal, title='ブロードキャスト'):
         success = []
         skipped = []
 
-        for channel in guild.text_channels:
+      for channel in guild.text_channels:
             try:
-                # アクティブ＋アーカイブ済みスレッドを全て取得
-                active_threads = channel.threads
-                archived = await channel.archived_threads(limit=100).flatten()
-                all_threads = list(active_threads) + archived
+                # アクティブスレッドを取得
+                all_threads = list(channel.threads)
+                
+                # アーカイブ済みスレッドも取得
+                try:
+                    async for archived_thread in channel.archived_threads(limit=100):
+                        all_threads.append(archived_thread)
+                except:
+                    pass
                 
                 for thread in all_threads:
                     if thread.name == self.thread_name.value:
