@@ -44,6 +44,7 @@ class ThreadNameModal(discord.ui.Modal, title='ブロードキャスト'):
                 found = False
                 for thread in all_threads:
                     if thread.name == self.thread_name.value:
+                        print(f"マッチ: {channel.name} > {thread.name}")
                         # 画像ファイルを取得
                         files = []
                         if self.message.attachments:
@@ -52,6 +53,7 @@ class ThreadNameModal(discord.ui.Modal, title='ブロードキャスト'):
                                 files.append(file)
                         
                         # テキストと画像を一緒に送信
+                           print(f"送信内容: content={bool(self.message.content)}, files={len(files)}")
                         if files:
                             await thread.send(content=self.message.content or "", files=files)
                         elif self.message.content:
