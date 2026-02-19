@@ -15,12 +15,27 @@ class BroadcastBot(discord.Client):
 
 client = BroadcastBot()
 
+if interaction.guild is None:
+    await interaction.response.send_message(
+        "このコマンドはサーバー内でのみ使用できます。",
+        ephemeral=True
+    )
+    return
+
 @client.tree.command(name="broadcast", description="指定した名前のスレッドに全チャンネル一斉送信")
 @app_commands.describe(
     thread_name="送信先スレッド名",
     message="送信するメッセージ"
 )
 async def broadcast(interaction: discord.Interaction, thread_name: str, message: str):
+
+    if interaction.guild is None:
+        await interaction.response.send_message(
+            "このコマンドはサーバー内でのみ使用できます。",
+            ephemeral=True
+        )
+        return
+
     await interaction.response.defer(ephemeral=True)
 
     guild = interaction.guild
@@ -28,18 +43,26 @@ async def broadcast(interaction: discord.Interaction, thread_name: str, message:
     skipped = []
 
     for channel in guild.text_channels:
-        # チャンネルのスレッドを取得（アクティブ）
-        try:
-            threads = channel.threads
-            for thread in threads:
-                if thread.name == thread_name:
+
+        # ① アクティブスレッド
+        for thread in channel.threads:
+            if thread.name == thread_name:
+                try:
+                    await thread.join()
                     await thread.send(message)
                     success.append(f"#{channel.name} > {thread.name}")
-                    break
-            else:
-                skipped.append(f"#{channel.name}")
-        except Exception as e:
-            skipped.append(f"#{channel.name} (エラー: {e})")
+                except Exception as e:
+                    skipped.append(f"#{channel.name} (エラー: {e})")
+
+        # ② アーカイブ済みスレッドも取得
+        async for thread in channel.archived_threads(limit=None):
+            if thread.name == thread_name:
+                try:
+                    await thread.join()
+                    await thread.send(message)
+                    success.append(f"#{channel.name} > {thread.name}")
+                except Exception as e:
+                    skipped.append(f"#{channel.name} (エラー: {e})")
 
     result = f"✅ 送信完了: {len(success)}件\n"
     if success:
@@ -49,4 +72,9 @@ async def broadcast(interaction: discord.Interaction, thread_name: str, message:
 
     await interaction.followup.send(result, ephemeral=True)
 
+
 client.run(os.environ["DISCORD_TOKEN"])
+
+@client.event
+async def on_thread_create(thread):
+    await thread.join()
