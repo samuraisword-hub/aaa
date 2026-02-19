@@ -25,7 +25,7 @@ class ThreadNameModal(discord.ui.Modal, title='ブロードキャスト'):
         success = []
         skipped = []
 
-      for channel in guild.text_channels:
+        for channel in guild.text_channels:
             try:
                 # アクティブスレッドを取得
                 all_threads = list(channel.threads)
@@ -37,9 +37,10 @@ class ThreadNameModal(discord.ui.Modal, title='ブロードキャスト'):
                 except:
                     pass
                 
+                found = False
                 for thread in all_threads:
                     if thread.name == self.thread_name.value:
-                      # 画像ファイルを取得
+                        # 画像ファイルを取得
                         files = []
                         if self.message.attachments:
                             for attachment in self.message.attachments:
@@ -53,8 +54,10 @@ class ThreadNameModal(discord.ui.Modal, title='ブロードキャスト'):
                             await thread.send(self.message.content)
                         
                         success.append(f"#{channel.name} > {thread.name}")
+                        found = True
                         break
-                else:
+                
+                if not found:
                     skipped.append(f"#{channel.name}")
             except Exception as e:
                 skipped.append(f"#{channel.name} (エラー: {e})")
