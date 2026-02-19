@@ -27,8 +27,12 @@ class ThreadNameModal(discord.ui.Modal, title='ブロードキャスト'):
 
         for channel in guild.text_channels:
             try:
-                threads = channel.threads
-                for thread in threads:
+                # アクティブ＋アーカイブ済みスレッドを全て取得
+                active_threads = channel.threads
+                archived = await channel.archived_threads(limit=100).flatten()
+                all_threads = list(active_threads) + archived
+                
+                for thread in all_threads:
                     if thread.name == self.thread_name.value:
                       # 画像ファイルを取得
                         files = []
